@@ -1,4 +1,9 @@
-streamlit==1.64.0
+streamlit
 pandas
+numpy
 openpyxl
-plotly==7.1.0
+geopandas
+plotly
+folium
+streamlit-folium
+matplotlib
