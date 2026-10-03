@@ -1,9 +1,0 @@
-streamlit
-pandas
-numpy
-openpyxl
-geopandas
-plotly
-folium
-streamlit-folium
-matplotlib
