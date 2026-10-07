@@ -1,8 +1,10 @@
 streamlit
 pandas
-geopandas
-matplotlib
+numpy
 openpyxl
+matplotlib
+geopandas
 shapely
-pyogrio
+pyproj
 fiona
+requests
