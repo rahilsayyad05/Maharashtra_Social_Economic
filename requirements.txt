@@ -1,9 +1,8 @@
 streamlit
 pandas
-numpy
-openpyxl
 geopandas
 matplotlib
-plotly
-folium
-streamlit-folium
+openpyxl
+shapely
+pyogrio
+fiona
