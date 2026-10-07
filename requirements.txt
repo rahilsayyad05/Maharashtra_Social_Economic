@@ -6,5 +6,5 @@ matplotlib
 geopandas
 shapely
 pyproj
-fiona
+pyogrio
 requests
