@@ -64,17 +64,21 @@ def load_and_prep_data():
     map_df["dist_clean"] = map_df["dist_clean"].replace(rename_map)
     df["dist_clean"] = df["dist_clean"].replace(rename_map)
 
-    # Mumbai Handling
-    if not df["dist_clean"].str.contains("Mumbai").any():
-        mumbai_data = pd.DataFrame([{"District": "Mumbai", "dist_clean": "Mumbai", "Rank": 1}])
-        df = pd.concat([df, mumbai_data], ignore_index=True)
-
-    mumbai_rank = df.loc[df["dist_clean"].str.contains("Mumbai"), "Rank"].values
-    if len(mumbai_rank) > 0:
-        target_rank = mumbai_rank[0]
-        for m_variant in ["Mumbai", "Mumbai City", "Mumbai Suburban"]:
-            if not (df["dist_clean"] == m_variant).any():
-                df = pd.concat([df, pd.DataFrame([{"District": m_variant, "dist_clean": m_variant, "Rank": target_rank}])], ignore_index=True)
+    # --- MUMBAI HANDLING (FIXED FOR 36 DISTRICTS) ---
+    mumbai_rank = None
+    for m in ["Mumbai", "Mumbai City", "Mumbai Suburban"]:
+        if (df["dist_clean"] == m).any():
+            mumbai_rank = df.loc[df["dist_clean"] == m, "Rank"].values[0]
+            break
+    
+    if mumbai_rank is not None:
+        # Puraane Mumbai variants hata dein (taaki duplicate na ho)
+        df = df[~df["dist_clean"].isin(["Mumbai", "Mumbai City", "Mumbai Suburban"])]
+        # Map ke hisaab se exactly 2 districts add karein
+        df = pd.concat([df, pd.DataFrame([
+            {"District": "Mumbai City", "dist_clean": "Mumbai City", "Rank": mumbai_rank},
+            {"District": "Mumbai Suburban", "dist_clean": "Mumbai Suburban", "Rank": mumbai_rank}
+        ])], ignore_index=True)
 
     # Merge
     merged = map_df.merge(df, on="dist_clean", how="left")
@@ -141,26 +145,33 @@ fig = generate_plot()
 
 # --- Step 4: Streamlit UI Layout ---
 
-# 1. Pura Map Dikhayega
 st.pyplot(fig)
+st.markdown("---")
 
-st.markdown("---") # Line separator
+# Data tayyar karein table ke liye
+display_df = df[["dist_clean", "Rank"]].dropna().sort_values("Rank").reset_index(drop=True)
+display_df.rename(columns={"dist_clean": "District"}, inplace=True) # Naam sundar banane ke liye
 
-# 2. Map ke niche Summary Boxes (Average Rank etc.)
+# --- YAHAN INDEX (Sr. No.) 1 SE SHURU KIYA GAYA HAI ---
+display_df.index = display_df.index + 1
+display_df.index.name = "Sr. No."
+
 st.subheader("📊 Data Summary & Averages")
-avg_rank = df["Rank"].mean()
-total_districts = df["dist_clean"].nunique()
+
+# Metrics update kiye gaye hain
+total_districts = len(display_df)
+avg_rank = display_df["Rank"].mean()
+top_district = display_df.iloc[0]["District"]
 
 col_m1, col_m2, col_m3 = st.columns(3)
 col_m1.metric(label="Total Districts", value=int(total_districts))
 col_m2.metric(label="Average Rank", value=f"{avg_rank:.2f}")
-col_m3.metric(label="Top Rank District", value=df.loc[df["Rank"].idxmin(), "dist_clean"])
+col_m3.metric(label="Top Rank District", value=top_district)
 
-st.write("") # Thodi space
+st.write("") 
 
-# 3. Data Overview Table (Rank wala table)
 st.subheader("Data Overview (Rank-wise)")
 st.dataframe(
-    df[["dist_clean", "Rank"]].dropna().sort_values("Rank").reset_index(drop=True), 
+    display_df, 
     use_container_width=True
 )
