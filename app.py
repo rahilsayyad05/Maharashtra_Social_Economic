@@ -102,24 +102,3 @@ def generate_plot():
 
     legend_handles = [
         mpatches.Patch(facecolor="#478848", edgecolor="black", label="High (1–12)"),
-        mpatches.Patch(facecolor="#F8B756", edgecolor="black", label="Medium (13–24)"),
-        mpatches.Patch(facecolor="#E85342", edgecolor="black", label="Low (25+)"),
-        mpatches.Patch(facecolor="#D3D3D3", edgecolor="black", label="No Data"),
-    ]
-    ax.legend(
-        handles=legend_handles,
-        title="District Rank",
-        loc="lower right",
-        fontsize=11,
-        title_fontsize=12,
-        frameon=True,
-    )
-
-    for _, row in merged.iterrows():
-        rank_val = row.get("Rank")
-        dist_name = row.get("dist_clean")
-        if pd.notna(rank_val) and pd.notna(dist_name):
-            pt = row["geometry"].representative_point()
-            ax.annotate(
-                text=f"{int(rank_val)}\n{dist_name}",
-                xy=(
