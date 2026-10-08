@@ -1,10 +1,6 @@
 streamlit
 pandas
-numpy
+plotly
 openpyxl
-matplotlib
 geopandas
-shapely
-pyproj
-pyogrio
-requests
+matplotlib
