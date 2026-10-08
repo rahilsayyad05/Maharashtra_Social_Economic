@@ -102,3 +102,65 @@ def generate_plot():
 
     legend_handles = [
         mpatches.Patch(facecolor="#478848", edgecolor="black", label="High (1–12)"),
+        mpatches.Patch(facecolor="#F8B756", edgecolor="black", label="Medium (13–24)"),
+        mpatches.Patch(facecolor="#E85342", edgecolor="black", label="Low (25+)"),
+        mpatches.Patch(facecolor="#D3D3D3", edgecolor="black", label="No Data"),
+    ]
+    ax.legend(
+        handles=legend_handles,
+        title="District Rank",
+        loc="lower right",
+        fontsize=11,
+        title_fontsize=12,
+        frameon=True,
+    )
+
+    for _, row in merged.iterrows():
+        rank_val = row.get("Rank")
+        dist_name = row.get("dist_clean")
+        if pd.notna(rank_val) and pd.notna(dist_name):
+            pt = row["geometry"].representative_point()
+            ax.annotate(
+                text=f"{int(rank_val)}\n{dist_name}",
+                xy=(pt.x, pt.y),
+                ha="center",
+                va="center",
+                fontsize=7,
+                fontweight="bold",
+                color="#111111",
+                linespacing=0.85,
+                path_effects=[pe.withStroke(linewidth=2, foreground="white", alpha=0.9)]
+            )
+
+    ax.set_title("District-wise Social Economic Rank in Maharashtra", fontsize=18, fontweight="bold", pad=20)
+    ax.set_axis_off()
+    plt.tight_layout()
+    return fig
+
+fig = generate_plot()
+
+# --- Step 4: Streamlit UI Layout ---
+
+# 1. Pura Map Dikhayega
+st.pyplot(fig)
+
+st.markdown("---") # Line separator
+
+# 2. Map ke niche Summary Boxes (Average Rank etc.)
+st.subheader("📊 Data Summary & Averages")
+avg_rank = df["Rank"].mean()
+total_districts = df["dist_clean"].nunique()
+
+col_m1, col_m2, col_m3 = st.columns(3)
+col_m1.metric(label="Total Districts", value=int(total_districts))
+col_m2.metric(label="Average Rank", value=f"{avg_rank:.2f}")
+col_m3.metric(label="Top Rank District", value=df.loc[df["Rank"].idxmin(), "dist_clean"])
+
+st.write("") # Thodi space
+
+# 3. Data Overview Table (Rank wala table)
+st.subheader("Data Overview (Rank-wise)")
+st.dataframe(
+    df[["dist_clean", "Rank"]].dropna().sort_values("Rank").reset_index(drop=True), 
+    use_container_width=True
+)
