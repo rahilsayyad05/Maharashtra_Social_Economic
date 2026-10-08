@@ -147,3 +147,25 @@ with col1:
 with col2:
     st.subheader("Data Overview")
     st.dataframe(df[["dist_clean", "Rank"]].dropna().sort_values("Rank").reset_index(drop=True), height=500)
+
+# --- NAYA CODE YAHAN SE SHURU KAREIN (Sabse last me) ---
+
+st.markdown("---") # Ek horizontal line banayega layout separate karne ke liye
+st.subheader("📊 Data Summary & Averages")
+
+# 1. Highlighted Metrics (Dabbe me dikhane ke liye)
+avg_rank = df["Rank"].mean()
+total_districts = df["dist_clean"].nunique()
+
+col_m1, col_m2, col_m3 = st.columns(3)
+col_m1.metric(label="Total Districts", value=int(total_districts))
+col_m2.metric(label="Average Rank", value=f"{avg_rank:.2f}")
+col_m3.metric(label="Top Rank District", value=df.loc[df["Rank"].idxmin(), "dist_clean"])
+
+st.write("") # Thodi space ke liye
+
+# 2. Excel sheet ke BAAKI SABHI columns ka Average, Min, Max (Table format me)
+st.markdown("**All Numeric Columns Statistics (Average, Min, Max, etc.):**")
+# df.describe() automatically sabhi number wale columns ka average nikal leta hai
+summary_df = df.describe().T  
+st.dataframe(summary_df, use_container_width=True)
