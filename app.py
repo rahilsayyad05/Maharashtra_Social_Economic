@@ -175,3 +175,34 @@ st.dataframe(
     display_df, 
     use_container_width=True
 )
+
+
+
+####################### new addition 
+# --- NAYA ADDITION: District ki Details Dekhne Ke Liye ---
+st.markdown("---")
+st.subheader("🔍 Check District Details")
+
+# Dropdown banayein jisme sabhi districts ke naam hon
+# Hum display_df use kar rahe hain taaki alphabetical order me naam aayein
+districts_list = sorted(display_df["District"].unique())
+selected_district = st.selectbox("Map ya Table me se koi District yahan select karein:", districts_list)
+
+if selected_district:
+    # Original dataframe (df) me se us district ki poori row nikaalein
+    district_info = df[df["dist_clean"] == selected_district].copy()
+    
+    # Bekar ke columns (jaise district clean name) hata dein taaki table saaf dikhe
+    if "dist_clean" in district_info.columns:
+        district_info = district_info.drop(columns=["dist_clean"])
+        
+    if not district_info.empty:
+        st.success(f"✅ **{selected_district}** ki poori jankari niche di gayi hai:")
+        
+        # Table ko Transpose (.T) kar rahe hain taaki padhne me aasan ho (Heading left me, Data right me)
+        info_to_display = district_info.T
+        info_to_display.columns = ["Value"] # Column ka naam set kiya
+        
+        st.dataframe(info_to_display, use_container_width=True)
+    else:
+        st.warning("Is district ka data available nahi hai.")
